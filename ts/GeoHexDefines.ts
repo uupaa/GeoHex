@@ -17,6 +17,7 @@ export interface XYL {
 export interface LatLng {
   lat:number,
   lng:number,
+  lon:number, // alias
 }
 
 export function calcHexSize(level:number):number {
@@ -38,7 +39,7 @@ export function xy2loc(x:number, y:number):LatLng {
 
   lat = 180 / Math.PI * (2 * Math.atan( Math.exp(lat * Math.PI / 180) ) - Math.PI / 2);
 
-  return { lng, lat };
+  return { lat, lng, lon:lng };
 }
 
 export type GeoHexCodeString = string; // as `XM566370240`

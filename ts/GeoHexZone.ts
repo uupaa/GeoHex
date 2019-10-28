@@ -41,12 +41,12 @@ export class GeoHexZone implements GeoHexZoneInterface {
     const h_cl  = xy2loc(x - 1 * h_size, y).lng;
     const h_cr  = xy2loc(x + 1 * h_size, y).lng;
     return [
-      { lat: h_lat, lng: h_l  },
-      { lat: h_top, lng: h_cl },
-      { lat: h_top, lng: h_cr },
-      { lat: h_lat, lng: h_r  },
-      { lat: h_btm, lng: h_cr },
-      { lat: h_btm, lng: h_cl }
+      { lat: h_lat, lng: h_l , lon: h_l  },
+      { lat: h_top, lng: h_cl, lon: h_cl },
+      { lat: h_top, lng: h_cr, lon: h_cr },
+      { lat: h_lat, lng: h_r , lon: h_r  },
+      { lat: h_btm, lng: h_cr, lon: h_cr },
+      { lat: h_btm, lng: h_cl, lon: h_cl },
     ];
   }
 }
