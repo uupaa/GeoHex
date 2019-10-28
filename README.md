@@ -129,7 +129,7 @@ if (zone1.equal(zone2)) {
 ```
 
 
-# LISENSE
+# LICENSE
 
 The MIT License (MIT), in honor of @sa2da. http://twitter.com/sa2da comes from http://www.geohex.org
 
