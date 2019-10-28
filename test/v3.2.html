@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<title>GeoHex ver 3.2 TEST CASE</title> 
+<style>
+.NG{color: #FF0000}
+.OK{color: #0000FF}
+</style> 
+</head> 
+<body>
+<div style="width:100%;border-bottom:1px dotted #000000;color:#999999;margin-bottom:10px;">OPTION(URL?mode=) <span id="link"></span></div>
+<div>TEST_CASE: <span id="file"></span></div>
+<div>VERSION: <span id="version"></span></div>
+<div>MODE: <span id="mode"></span></div>
+<div>CACHE: <span id="cache"></span></div>
+<div>TOTAL_COUNT: <span id="count"></span></div>
+<hr />
+INPUT: <span id="input"></span> ____ OUTPUT: <span id="output"></span>
+<hr />
+<div id ="log"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> 
+<script type="module">
+import { GeoHex } from "../dist/GeoHex.js";
+
+const mode = parseInt((new URL(location)).searchParams.get("mode") || "0");  // get test mode from query string
+
+// mode values
+//  0:code -> HEX
+//  1:coordinate -> HEX
+//  2:code -> XY
+//  3:XY -> HEX
+//  4:coordinate ->XY
+
+const testMode = [
+  { // mode:0
+    casename: 'code2HEX',
+    mode: 'code -> HEX',
+    output: 'zone.lat, zone.lng (expectaion)',
+    logic: (test_case) => {
+      const lat  = parseFloat(test_case[1]);
+      const lng  = parseFloat(test_case[2]);
+      const code = test_case[0];
+      const zone = GeoHex.getZoneByCode(code);
+
+      return {
+        err: (Math.abs(zone.lat - lat) < 0.0000000001 && Math.abs(zone.lng - lng) < 0.0000000001) ? 0 : 1,
+        message: `${code} ____ ${zone.lat}, ${zone.lng} (${lat}, ${lng})`,
+      };
+    }
+  }, { // mode:1
+    casename: 'coord2HEX',
+    mode: 'coordinate -> HEX',
+    input: 'level, lat, lng',
+    output: 'zone.code (expectaion)',
+    logic: (test_case) => {
+      const level = parseInt(test_case[0]);
+      const lat   = parseFloat(test_case[1]);
+      const lng   = parseFloat(test_case[2]);
+      const code  = test_case[3];
+      const zone  = GeoHex.getZoneByLocation(lat, lng, level);
+
+      return {
+        err: zone.code == code ? 0 : 1,
+        message: `${level}, ${lat}, ${lng} ____ ${zone.code} (${code})`,
+      };
+    }
+  }, { // mode:2
+    casename: 'coord2XY',
+    mode: 'coordinate -> XY',
+    input: 'level, lat, lng',
+    output: 'X, Y (expectaion)',
+    logic: (test_case) => {
+      const level = parseInt(test_case[0]);
+      const lat   = parseFloat(test_case[1]);
+      const lng   = parseFloat(test_case[2]);
+      const X     = parseInt(test_case[3]);
+      const Y     = parseInt(test_case[4]);
+      const XY    = GeoHex.getXYByLocation(lat, lng, level);
+
+      return {
+        err: (XY.x == X)&&(XY.y == Y) ? 0 : 1,
+        message: `${level}, ${lat}, ${lng} ____ ${XY.x}, ${XY.y} (${X}, ${Y})`,
+      };
+    }
+  }, { // mode:3
+    casename: 'code2XY',
+    mode: 'code -> XY',
+    input: 'code',
+    output: 'zone.x, zone.y (expectaion)',
+    logic: (test_case) => {
+      const code  = test_case[0];
+      const X     = parseInt(test_case[1]);
+      const Y     = parseInt(test_case[2]);
+      const zone  = GeoHex.getZoneByCode(code);
+      const h_max = Math.pow(3,code.length);
+
+      return {
+        err: (zone.x == X)&&(zone.y == Y) ? 0 : 1,
+        message: `${code} ____ ${zone.x}, ${zone.y} (${X}, ${Y})`,
+      };
+    }
+  }, { // mode:4
+    casename: 'XY2HEX',
+    mode: 'XY -> HEX',
+    input: 'level, X, Y',
+    output: 'zone.code (expectaion)',
+    logic: (test_case) => {
+      const level = parseInt(test_case[0]);
+      const X     = parseInt(test_case[1]);
+      const Y     = parseInt(test_case[2]);
+      const code  = test_case[3];
+      const zone  = GeoHex.getZoneByXY(X, Y, level);
+
+      return {
+        err: zone.code == code ? 0 : 1,
+        message: `${level}, ${X}, ${Y} ____ ${zone.code} (${code})`,
+      };
+    }
+  }, { // mode:5
+    casename: 'Rect2XYs',
+    mode: 'Rect -> XYs',
+    input: 'South, West, North, East, Level, Buffer',
+    output: 'List of XYs (expectaion)',
+    logic: (test_case) => {
+      const south  = parseFloat(test_case[0]);
+      const west   = parseFloat(test_case[1]);
+      const north  = parseFloat(test_case[2]);
+      const east   = parseFloat(test_case[3]);
+      const level  = parseInt(test_case[4]);
+      const buffer = test_case[5];
+      const expect = test_case[6];
+      const result = GeoHex.getXYListByRect(south, west, north, east, level);
+
+      let errMsg = "";
+      const r_len  = result.length;
+      const e_len  = expect.length;
+
+      $.each(expect,function(e_idx,e_dat) {
+          var e_exist = false;
+          $.each(result,function(r_idx,r_dat) {
+              if (e_dat.x == r_dat.x && e_dat.y == r_dat.y) {
+                  e_exist = true;
+                  result.splice(r_idx,1);
+                  return false;
+              }
+          });
+          if (!e_exist) {
+              errMsg += '<br>X:' + e_dat.x + ' and Y:' + e_dat.y + ' is included in expected but not in result.';
+          }
+      });
+
+      result.forEach(r_dat => {
+        errMsg += `<br>X:${r_dat.x} and Y:${r_dat.y} is included in result but not in expected.`;
+      });
+
+      return {
+        err: errMsg === '' ? 0 : 1,
+        message: `SW: ${south},${west} NE: ${north},${east} Level: ${level} Zones: ${r_len} (${e_len}) <a href="./visualCheckTool/v3.02_rect.html?rect=${south},${west},${north},${east},${level}">Visual checker</a>${errMsg}`,
+      };
+    }
+  }
+];
+
+async function runTest(index) {
+    $('#log').empty();
+    var testMeta  = testMode[index];
+    $('#mode').html(testMeta['mode']);
+//        $('#cache').html(testMeta['cache']);
+    var testJson  = 'hex_v3.2_test_' + testMeta['casename'] + '.json';
+    $('#file').html("<a href='./" + testJson + "'>" + testJson + "</a>");
+    $('#input').html(testMeta['input']);
+    $('#output').html(testMeta['output']);
+
+    var testLogic = testMeta['logic'];
+
+    const json = await(await fetch(testJson)).json();
+    let err = 0;
+
+    $('#count').text(json.length);
+    json.forEach((line, index) => {
+        var result = testLogic(line);
+        addLog((result.err ? "[<span class='NG'>NG</span>] " : "[<span class='OK'>OK</span>] " ) + result.message);
+        err += result.err;
+    });
+    if (err) {
+        console.error(`error count: ${err}`);
+        /*
+        setTimeout(() => {
+            alert(err +"件のエラー");
+        }, 1000);
+         */
+    }
+}
+
+function initialize() {
+    //$('#version').text(GEOHEX.version);
+    $('#version').text(GeoHex.version);
+    //$('#cache').text(GEOHEX.cache_on);
+    $.each(testMode,function(i,mode) {
+        $('#link').append(' <a href="?mode=' + i + '">' + i + ': ' + mode['mode'] + '</a>');
+    });
+    (async() => {
+        await runTest(mode);
+    })();
+}
+function addLog(_text){
+    $('#log').append("<br>"+_text);
+}
+
+window.onload = initialize;
+</script> 
+</body> 
+
+</html> 
