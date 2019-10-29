@@ -16,7 +16,7 @@ $ npm i -S @uupaa/geohex
 
 and other commands.
 
-| commands             | input file(s) | output file(s) |
+| commands             | input file    | output file(s) |
 |----------------------|---------------|-------------|
 | `npm run build`      | `ts/*.ts`     | `dist/GeoHex.js` |
 | `npm run bundle`     | `dist/GeoHex.js` | `dist/GeoHex.esm.js` |
@@ -62,12 +62,12 @@ const lv = 9;
 
 // --- encode lat,lng to GeoHexCode  ---
 const zone1 = GeoHex.getZoneByLocation(lat, lng, lv);
-console.log(zone1); // { lat: 35.78044332128247, lng: 139.57018747142203, level: 9, x: 101375, y: -35983, code: "XM566370240" }
+console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.57018747142203, lon, x: 101375, y: -35983, code: XM566370240, level: 9 }
 
 // --- decode GeoHexCode to GeoHexZone ---
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
-if (zone1.equal(zone2)) {
+if (zone1.equals(zone2)) {
   console.log(`matchd`);
 }
 </script> 
@@ -88,12 +88,12 @@ const lv = 9;
 
 // --- encode lat,lng to GeoHexCode  ---
 const zone1 = GeoHex.getZoneByLocation(lat, lng, lv);
-console.log(zone1); // { lat: 35.78044332128247, lng: 139.57018747142203, x: 101375, y: -35983, level: 9, code: "XM566370240" }
+console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.57018747142203, lon, x: 101375, y: -35983, code: XM566370240, level: 9 }
 
 // --- decode GeoHexCode to GeoHexZone ---
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
-if (zone1.equal(zone2)) {
+if (zone1.equals(zone2)) {
   console.log(`matchd`);
 }
 ```
@@ -115,17 +115,62 @@ const lv = 9;
 
 // --- encode lat,lng to GeoHexCode  ---
 const zone1 = GeoHex.getZoneByLocation(lat, lng, lv);
-console.log(zone1); // { lat: 35.78044332128247, lng: 139.57018747142203, level: 9, x: 101375, y: -35983, code: "XM566370240" }
+console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.57018747142203, lon, x: 101375, y: -35983, code: XM566370240, level: 9 }
 
 // --- decode GeoHexCode to GeoHexZone ---
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
-if (zone1.equal(zone2)) {
+if (zone1.equals(zone2)) {
   console.log(`matchd`);
 }
 </script> 
 </body> 
 </html> 
+```
+
+# Class
+
+## Class GeoHex
+
+```ts
+export class GeoHex {
+  static version = "3.2.0"; // http://geohex.net/src/script/hex_v3.2_core.js
+
+  // Convert a map location(lat,lng) to a GeoHex Zone structure.
+  static getZoneByLocation(lat:number, lng:number, level:number):GeoHexZoneInterface,
+
+  // Convert a GeoHex position(x,y) to a GeoHex Zone structure.
+  static getZoneByXY(x:number, y:number, level:number):GeoHexZoneInterface,
+
+  // Convert a GeoHex code string to a GeoHex Zone structure.
+  static getZoneByCode(code:GeoHexCodeString):GeoHexZoneInterface,
+
+  // Convert a GeoHex position(x,y) to a map location(lat,lng).
+  static getXYByLocation(lat:number, lng:number, level:number):XYL,
+
+  // List the shortest routes from map location A to map location B.
+  static getXYListByRect(a_lat:number, a_lng:number, b_lat:number, b_lng:number, level:number):XY[],
+}  
+
+```
+
+## Class GeoHexZone
+
+```ts
+export class GeoHexZone implements GeoHexZoneInterface {
+  constructor(lat:number, lng:number, x:number, y:number, code:string),
+  get lat():number,
+  get lng():number,
+  get lon():number, // alias 
+  get x():number,
+  get y():number,
+  get code():string,
+  get level():number,
+  equals(zone:GeoHexZoneInterface):boolean,
+  getHexSize():number,
+  getHexCoords():LatLng[],
+  toJSON():string,
+}
 ```
 
 

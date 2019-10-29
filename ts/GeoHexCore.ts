@@ -1,10 +1,10 @@
 import { H_KEY, H_K, XY, XYL, LatLng, GeoHexCodeString } from "./GeoHexDefines.js";
-import { calcHexSize, loc2xy, xy2loc } from "./GeoHexDefines.js";
+import { calcHexSize, latLng2xy, xy2latLng } from "./GeoHexDefines.js";
 import { GeoHexZone } from "./GeoHexZone.js";
 
 export function getXYByLocation(lat:number, lng:number, level:number):XYL {
   const h_size:number = calcHexSize(level);
-  const z_xy:XY = loc2xy(lng, lat);
+  const z_xy:XY = latLng2xy(lat, lng);
   const lng_grid:number = z_xy.x;
   const lat_grid:number = z_xy.y;
   const unit_x:number = 6 * h_size;
@@ -41,7 +41,7 @@ export function getZoneByXY(xyl:XYL):GeoHexZone {
   const unit_y:number  = 6 * h_size * H_K;
   const h_lat:number   = (H_K * x * unit_x + y * unit_y) / 2;
   const h_lng:number   = (h_lat - y * unit_y) / H_K;
-  const z_loc:LatLng   = xy2loc(h_lng, h_lat);
+  const z_loc:LatLng   = xy2latLng(h_lng, h_lat);
   let   z_loc_x:number = z_loc.lng;
   const z_loc_y:number = z_loc.lat;
   
@@ -218,13 +218,13 @@ function adjustXY(x:number, y:number, level:number):XYL {
   return { x, y, level };
 }
 
-export function getXYListByRect(lat1:number, lng1:number, lat2:number, lng2:number, level:number):XY[] {
+export function getXYListByRect(a_lat:number, a_lng:number, b_lat:number, b_lng:number, level:number):XY[] {
   const base_steps = Math.pow(3, level + 2) * 2;
   
-  const min_lat = (lat1 > lat2) ? lat2 : lat1;
-  const max_lat = (lat1 < lat2) ? lat2 : lat1;
-  const min_lng = lng1;
-  const max_lng = lng2;
+  const min_lat = (a_lat > b_lat) ? b_lat : a_lat;
+  const max_lat = (a_lat < b_lat) ? b_lat : a_lat;
+  const min_lng = a_lng;
+  const max_lng = b_lng;
   
   const zone_tl = getZoneByXY(getXYByLocation(max_lat, min_lng, level));
   const zone_bl = getZoneByXY(getXYByLocation(min_lat, min_lng, level));
@@ -233,20 +233,19 @@ export function getXYListByRect(lat1:number, lng1:number, lat2:number, lng2:numb
 
   const h_size = zone_br.getHexSize();
   
-  const bl_xy = loc2xy(zone_bl.lng, zone_bl.lat);
-  const bl_cl = xy2loc(bl_xy.x - h_size, bl_xy.y).lng;
-  const bl_cr = xy2loc(bl_xy.x + h_size, bl_xy.y).lng;
+  const bl_xy = latLng2xy(zone_bl.lat, zone_bl.lng);
+  const bl_cl = xy2latLng(bl_xy.x - h_size, bl_xy.y).lng;
+  const bl_cr = xy2latLng(bl_xy.x + h_size, bl_xy.y).lng;
 
-  const br_xy = loc2xy(zone_br.lng, zone_br.lat);
-  const br_cl = xy2loc(br_xy.x - h_size, br_xy.y).lng;
-  const br_cr = xy2loc(br_xy.x + h_size, br_xy.y).lng;
+  const br_xy = latLng2xy(zone_br.lat, zone_br.lng);
+  const br_cl = xy2latLng(br_xy.x - h_size, br_xy.y).lng;
+  const br_cr = xy2latLng(br_xy.x + h_size, br_xy.y).lng;
 
   const s_steps = getXSteps(min_lng, max_lng, zone_bl, zone_br);
   const w_steps = getYSteps(min_lng, zone_bl, zone_tl);
   const n_steps = getXSteps(min_lng, max_lng, zone_tl, zone_tr);
   const e_steps = getYSteps(max_lng, zone_br, zone_tr);
 
-  // 矩形端にHEXの抜けを無くすためのエッジ処理
   const edge = { l:0, r:0, t:0, b:0 };
   
   if (s_steps === n_steps && s_steps >= base_steps) {
@@ -275,23 +274,18 @@ export function getXYListByRect(lat1:number, lng1:number, lat2:number, lng2:numb
   if (zone_bl.lat > min_lat) { edge.b++; }
   if (zone_tl.lat > max_lat) { edge.t++; } 
 
-  // 仮想HEX_XY座標系上の辺リスト（ S & W ）を取得
   const s_list = getXList(zone_bl, s_steps, edge.b);
   const w_list = getYList(zone_bl, w_steps, edge.l);
   
-  // 仮想HEX_XY座標系上の矩形端（ NW & SE ）取得
   const tl_end = { x: w_list[w_list.length - 1].x, y: w_list[w_list.length - 1].y };
   const br_end = { x: s_list[s_list.length - 1].x, y: s_list[s_list.length - 1].y };
   
-  // 仮想HEX_XY座標系上の辺リスト（ N & E ）取得
   const n_list = getXList(tl_end, n_steps, edge.t);
   const e_list = getYList(br_end, e_steps, edge.r);
   
-  // S & W & N & E 辺リストに囲まれた内包HEXリストを取得
   return mergeList(s_list.concat(w_list, n_list, e_list), level);
 }
 
-// longitude方向の仮想リスト取得
 function getXList(_min:XY, _xsteps:number, _edge:number):XY[] {
   const list = [];
   for (let i = 0; i < _xsteps; i++) {
@@ -302,7 +296,6 @@ function getXList(_min:XY, _xsteps:number, _edge:number):XY[] {
   return list;
 }
 
-// latitude方向の仮想リスト取得 (この時点では補正しない)
 function getYList(_min:XY, _ysteps:number, _edge:number):XY[] {
   const list = [];
   const steps_base = Math.floor(_ysteps);
@@ -326,7 +319,6 @@ function getYList(_min:XY, _ysteps:number, _edge:number):XY[] {
   return list;
 }
 
-// longitude方向のステップ数取得
 function getXSteps(_minlng:number, _maxlng:number, _min:GeoHexZone, _max:GeoHexZone):number {
   const minsteps = Math.abs(_min.x - _min.y);
   const maxsteps = Math.abs(_max.x - _max.y);
@@ -369,7 +361,6 @@ function getXSteps(_minlng:number, _maxlng:number, _min:GeoHexZone, _max:GeoHexZ
   return steps + 1;
 }
 
-// latitude方向のステップ数取得
 function getYSteps(_lng:number, _min:GeoHexZone, _max:GeoHexZone):number {
   let min_x = _min.x;
   let min_y = _min.y;
@@ -395,15 +386,12 @@ function mergeList(_arr:XY[], _level:number):XY[] {
   const newArr:XY[] = [];
   const mrgArr:Array<Array<boolean>> = [];
   
-  // HEX_Y座標系でソート
   _arr.sort(function(a, b) {
     return ( a.x > b.x ? 1 : a.x < b.x ? -1 : a.y < b.y ? 1 : -1 );
   });
   
-  // マージ＆補完
   for (let i = 0; i < _arr.length; i++) {
     if (!i) {
-      // 仮想XY値が確定したこの時点でadjust補正
       var inner_xy = adjustXY(_arr[i].x, _arr[i].y, _level);
       var x = inner_xy.x;
       var y = inner_xy.y;
@@ -415,7 +403,6 @@ function mergeList(_arr:XY[], _level:number):XY[] {
     } else {
       var mrg = margeCheck(_arr[i - 1], _arr[i]);
       for(let j = 0; j < mrg; j++) {
-        // 仮想XY値が確定したこの時点でadjust補正
         const inner_xy = adjustXY(_arr[i].x, _arr[i].y+j, _level);
         const x = inner_xy.x;
         const y = inner_xy.y;

@@ -17,14 +17,14 @@ export interface XYL {
 export interface LatLng {
   lat:number,
   lng:number,
-  lon:number, // alias
+  lon:number, // lng alias
 }
 
 export function calcHexSize(level:number):number {
   return H_BASE / Math.pow(3, level + 3);
 }
-  
-export function loc2xy(lng:number, lat:number):XY {
+
+export function latLng2xy(lat:number, lng:number):XY {
   const x:number = lng * H_BASE / 180;
   let y:number = Math.log( Math.tan((90 + lat) * Math.PI / 360) ) / (Math.PI / 180);
 
@@ -33,7 +33,7 @@ export function loc2xy(lng:number, lat:number):XY {
   return { x, y };
 }
 
-export function xy2loc(x:number, y:number):LatLng {
+export function xy2latLng(x:number, y:number):LatLng {
   const lng:number = (x / H_BASE) * 180;
   let lat:number = (y / H_BASE) * 180;
 
@@ -47,11 +47,12 @@ export type GeoHexCodeString = string; // as `XM566370240`
 export interface GeoHexZoneInterface {
   lat:number,
   lng:number,
+  lon:number, // lng alias
   x:number,
   y:number,
   code:string,
   level:number,
-  equal(zone:GeoHexZoneInterface):boolean,
+  equals(zone:GeoHexZoneInterface):boolean,
   getHexSize():number,
   getHexCoords():LatLng[],
 }

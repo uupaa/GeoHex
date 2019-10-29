@@ -2,7 +2,7 @@
 assets/
 
 ## dist
-dist/
+dist/tsconfig.tsbuildinfo
 
 ## ignore the dependency modules directory
 node_modules
