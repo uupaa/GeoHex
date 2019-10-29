@@ -134,7 +134,7 @@ if (zone1.equals(zone2)) {
 
 ```ts
 export class GeoHex {
-  static version = "3.2.0"; // http://geohex.net/src/script/hex_v3.2_core.js
+  static version:SemVerString = "3.2.0"; // http://geohex.net/src/script/hex_v3.2_core.js
 
   // Convert a map location(lat,lng) to a GeoHex Zone structure.
   static getZoneByLocation(lat:number, lng:number, level:number):GeoHexZoneInterface,
