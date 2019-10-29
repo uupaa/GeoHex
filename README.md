@@ -68,7 +68,7 @@ console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.5701874714220
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
 if (zone1.equals(zone2)) {
-  console.log(`matchd`);
+  console.log(`matched`);
 }
 </script> 
 </body> 
@@ -94,7 +94,7 @@ console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.5701874714220
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
 if (zone1.equals(zone2)) {
-  console.log(`matchd`);
+  console.log(`matched`);
 }
 ```
 
@@ -121,7 +121,7 @@ console.log(zone1.toJSON()); // { lat: 35.78044332128247, lng: 139.5701874714220
 const zone2 = GeoHex.getZoneByCode(zone1.code);
 
 if (zone1.equals(zone2)) {
-  console.log(`matchd`);
+  console.log(`matched`);
 }
 </script> 
 </body> 
