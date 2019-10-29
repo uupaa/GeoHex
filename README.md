@@ -154,7 +154,7 @@ export class GeoHex {
 
 ```
 
-## Class GeoHexZone
+## Class GeoHexZone and other Interfaces
 
 ```ts
 export class GeoHexZone implements GeoHexZoneInterface {
@@ -171,8 +171,24 @@ export class GeoHexZone implements GeoHexZoneInterface {
   getHexCoords():LatLng[],
   toJSON():string,
 }
-```
 
+export interface XY {
+  x:number,
+  y:number,
+}
+
+export interface XYL {
+  x:number,
+  y:number,
+  level:number,
+}
+
+export interface LatLng {
+  lat:number,
+  lng:number,
+  lon:number, // lng alias
+}
+```
 
 # LICENSE
 
