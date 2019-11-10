@@ -8,23 +8,61 @@
 $ npm i -S @uupaa/geohex
 ```
 
+# import
+ 
+```ts
+// Pattern 1 (recommended): import complete relative path without `--moduleResolution` and `--baseUrl` compiler options.
+// For import url, specify the complete relative path.
+// This works with node.js and browser. Please consider bundled into one file.
+import { GeoHex } from "../node_modules/@uupaa/geohex/lib/GeoHex.js";
+
+/*
+{
+  "compilerOptions": {
+    "module": "ESNext",
+  //"moduleResolution": "node",
+  //"baseUrl": "./",
+  }
+}
+ */
+```
+
+```ts
+// Pattern 2: import package name with `--moduleResolution` and `--baseUrl` compiler options.
+// For import url, specify the short package name.
+// This works in node.js, but does not work if you import directly from the browser.
+import { GeoHex } from "@uupaa/geohex";
+
+/*
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": "./",
+  }
+}
+ */
+```
+
 # Build and Bundle modules
 
-`npm run build` command build to `dist/GeoHex.js` file.
+The `npm run build` command, build to `lib/GeoHex.js` file.
 
-`npm run bundle:all` command bundle to `dist/GeoHex.esm.js`, `dist/GeoHex.es5.js` and `dist/GeoHex.cjs.js` files.
+`npm run bundle:all` command, bundle to `lib/GeoHex.esm.js`, `lib/GeoHex.es5.js` and `lib/GeoHex.cjs.js` files.
 
-and other commands.
+Other commands.
 
 | commands             | input file    | output file(s) |
 |----------------------|---------------|-------------|
-| `npm run build`      | `ts/*.ts`     | `dist/GeoHex.js` |
-| `npm run bundle`     | `dist/GeoHex.js` | `dist/GeoHex.esm.js` |
-| `npm run bundle:esm` | `dist/GeoHex.js` | `dist/GeoHex.esm.js` |
-| `npm run bundle:es5` | `dist/GeoHex.js` | `dist/GeoHex.es5.js` |
-| `npm run bundle:cjs` | `dist/GeoHex.js` | `dist/GeoHex.cjs.js` |
-| `npm run bundle:all` | `dist/GeoHex.js` | `dist/GeoHex.esm.js` <br />`dist/GeoHex.es5.js` <br />`dist/GeoHex.cjs.js` |
+| `npm run build`      | `ts/`         | `lib/GeoHex.js` <br /> `lib/GeoHex.d.ts` |
+| `npm run bundle`     | `lib/GeoHex.js` | `lib/GeoHex.esm.js` |
+| `npm run bundle:esm` | `lib/GeoHex.js` | `lib/GeoHex.esm.js` |
+| `npm run bundle:es5` | `lib/GeoHex.js` | `lib/GeoHex.es5.js` |
+| `npm run bundle:cjs` | `lib/GeoHex.js` | `lib/GeoHex.cjs.js` |
+| `npm run bundle:all` | `lib/GeoHex.js` | `lib/GeoHex.esm.js` <br />`lib/GeoHex.es5.js` <br />`lib/GeoHex.cjs.js` |
 | `npm run watch`      |  |  |
+| `npm run test`       |  |  |
+| `npm run test:compat` |  |  |
 
 # Browser and runtime support
 
@@ -53,7 +91,7 @@ Use `import` and `<script type="module">` style.
 </head> 
 <body>
 <script type="module">
-import { GeoHex } from "./dist/GeoHex.esm.js";
+import { GeoHex } from "./node_modules/@uupaa/geohex/lib/GeoHex.esm.js";
 console.log(GeoHex.version);
 
 const lat = 35.780516755235475;
@@ -79,7 +117,7 @@ Use CommonJS style.
 
 ```js
 // test/cjs.js
-const GeoHex = require("../dist/GeoHex.cjs.js").GeoHex;
+const GeoHex = require("../lib/GeoHex.cjs.js").GeoHex;
 console.log(GeoHex.version);
 
 const lat = 35.780516755235475;
@@ -106,7 +144,7 @@ Use `<script src="GeoHex.es5.js">` style.
 <title>GeoHex ver 3.2 browser test</title> 
 </head> 
 <body>
-<script src="../dist/GeoHex.es5.js"></script>
+<script src="./node_modules/@uupaa/geohex/lib/GeoHex.es5.js"></script>
 <script>
 const GeoHex = GeoHexLib.GeoHex;
 const lat = 35.780516755235475;
@@ -128,10 +166,7 @@ if (zone1.equals(zone2)) {
 </html> 
 ```
 
-# Class
-
-## Class GeoHex
-
+# Class GeoHex
 ```ts
 export class GeoHex {
   static version:SemVerString = "3.2.0"; // http://geohex.net/src/script/hex_v3.2_core.js

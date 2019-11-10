@@ -1,4 +1,4 @@
-const GeoHex = require("../dist/GeoHex.cjs.js").GeoHex;
+const GeoHex = require("../lib/GeoHex.cjs.js").GeoHex;
 
 console.log(GeoHex.version);
 
