@@ -1,7 +1,7 @@
 {
   "name": "@uupaa/geohex",
-  "version": "0.0.5",
-  "description": "GeoHex v3.2 for TypeScript",
+  "version": "0.0.6",
+  "description": "GeoHex v3.2 with TypeScript",
   "keywords": [
     "GeoHex",
     "TypeScript",

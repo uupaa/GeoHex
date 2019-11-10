@@ -1,6 +1,6 @@
-# GeoHex v3 for TypeScript
+# GeoHex v3.2 with TypeScript
 
-[GeoHex](http://www.geohex.org/) v3.2 for TypeScript implementation.
+[GeoHex](http://www.geohex.org/) v3.2 with TypeScript implementation.
 
 # PREPARE
 
